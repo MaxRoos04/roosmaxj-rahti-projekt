@@ -10,3 +10,5 @@ def read_root():
 @app.get("/items/{id}")
 def read_item(item_id: int, q: str = None):
     return {"id": id, "q": q}
+
+
