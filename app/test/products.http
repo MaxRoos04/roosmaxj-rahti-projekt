@@ -8,3 +8,11 @@ GET {{apiUrl}}
 GET {{apiUrl}}/1002
 
 ### Create new product 
+
+POST {{apiUrl}}
+Content-Type: application/json
+
+{
+    "name": "Jeans",
+    "price": 75
+}
