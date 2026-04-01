@@ -13,9 +13,8 @@ POST {{apiUrl}}
 Content-Type: application/json
 
 {
-    "name": "Room1",
-    "price": 75,'
-    "Level": "Standard"
+    "name": "Jeans",
+    "price": 75
 }
 
 ### Delete product 
