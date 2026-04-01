@@ -27,3 +27,7 @@ def read_root():
 @app.get("/rooms")
 def rooms():
    return temp_rooms
+
+@app.post("/bookings")
+def create_booking():
+    return{ "msg": "Bokning skapad!"}

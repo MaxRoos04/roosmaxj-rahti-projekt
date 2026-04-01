@@ -1,33 +1,18 @@
-@apiUrl = http://127.0.0.1:8080/rooms
+@apiUrl = http://127.0.0.1:8080
 
-### Get all products
-GET {{apiUrl}}
+### Get all rooms
 
-### Get one product
+GET {{apiUrl}}/rooms
 
-GET {{apiUrl}}/1002
+### Get all bookings
+
+GET {{apiUrl}}/bookings
 
 ### Create new product 
 
-POST {{apiUrl}}
+POST {{apiUrl}}/bookings
 Content-Type: application/json
 
 {
-    "name": "Jeans",
-    "price": 75
+    "room_id": 1,
 }
-
-### Delete product 
-
-DELETE {{apiUrl}}/1005
-
-### Update product
-
-PATCH {{apiUrl}}/1001
-Content-Type: application/json
-
-{
-    "price": 75
-}
-
-
