@@ -1,4 +1,4 @@
-@apiUrl = http://127.0.0.1:8080/rooms
+@apiUrl = https://fw-teaching.fi/demo/wdbocms/api/v1/products/
 
 ### Get all products
 GET {{apiUrl}}
@@ -13,9 +13,8 @@ POST {{apiUrl}}
 Content-Type: application/json
 
 {
-    "name": "Room1",
-    "price": 75,'
-    "Level": "Standard"
+    "name": "Jeans",
+    "price": 75
 }
 
 ### Delete product 
