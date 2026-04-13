@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from app.db import get_conn, create_schema
 
 app = FastAPI()
 
@@ -14,6 +15,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+#Skapa databas schema
+create_schema()
+
 temp_rooms = [
     { "room_number": 1001, "room_type": "double", "price": 25},
     {"room_number": 1002, "room_type": "single", "price": 10},
@@ -22,7 +26,13 @@ temp_rooms = [
 
 @app.get("/")
 def read_root():
-    return { "msg": "Hejsan välommen till hotellbokning"}
+    #testar databasen 
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("""
+            SELECT 'Databasen fungerar' as msg, version() as version
+        """)
+        db_status = cur.fetchone()
+    return { "msg": "Hejsan välommen till hotellbokning", "db": db_status}
 
 @app.get("/rooms")
 def rooms():
