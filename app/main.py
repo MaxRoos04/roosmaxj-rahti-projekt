@@ -78,3 +78,15 @@ def create_booking(booking: Booking):
         ))
         new_booking = cur.fetchone()
     return {"msg": "Booking created!", "id": new_booking["id"]}
+
+#Endpoint 
+@app.get("/bookings")
+def get_bookings():
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("""
+            SELECT *
+            FROM bookings
+            ORDER BY datefrom
+        """)
+        bookings = cur.fetchall()
+    return bookings
