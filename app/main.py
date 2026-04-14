@@ -1,6 +1,7 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from datetime import date
 from app.db import get_conn, create_schema
 
 app = FastAPI()
@@ -15,29 +16,65 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-#Skapa databas schema
+# Create tables at startup
 create_schema()
 
-temp_rooms = [
-    { "room_number": 1001, "room_type": "double", "price": 25},
-    {"room_number": 1002, "room_type": "single", "price": 10},
-    {"room_number": 1003, "room_type": "suite", "price": 250}
-]
+# Pydantic model
+class Booking(BaseModel):
+    guest_id: int
+    room_id: int
+    datefrom: date
+    dateto: date
 
 @app.get("/")
 def read_root():
-    #testar databasen 
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT version()")
+        result = cur.fetchone()
+    return {"msg": "Hotel API!", "db_status": result}
+
+# List all rooms
+@app.get("/rooms")
+def get_rooms():
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
-            SELECT 'Databasen fungerar' as msg, version() as version
+            SELECT *
+            FROM rooms
+            ORDER BY room_number
         """)
-        db_status = cur.fetchone()
-    return { "msg": "Hejsan välommen till hotellbokning", "db": db_status}
+        rooms = cur.fetchall()
+    return rooms
 
-@app.get("/rooms")
-def rooms():
-   return temp_rooms
+# Get one room
+@app.get("/rooms/{id}")
+def get_room(id: int):
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("""
+            SELECT *
+            FROM rooms
+            WHERE id = %s
+        """, [id])
+        room = cur.fetchone()
+    return room
 
+# Create booking
 @app.post("/bookings")
-def create_booking():
-    return{ "msg": "Bokning skapad!"}
+def create_booking(booking: Booking):
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("""
+            INSERT INTO bookings (
+                guest_id,
+                room_id,
+                datefrom,
+                dateto
+            ) VALUES (
+                %s, %s, %s, %s
+            ) RETURNING id
+        """, (
+            booking.guest_id,
+            booking.room_id,
+            booking.datefrom,
+            booking.dateto
+        ))
+        new_booking = cur.fetchone()
+    return {"msg": "Booking created!", "id": new_booking["id"]}
