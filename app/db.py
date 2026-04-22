@@ -44,6 +44,7 @@ def create_schema():
                 info VARCHAR
             );
             -- man kan sätta default också senare:
+            ALTER TABLE bookings ADD COLUMN IF NOT EXISTS stars INT;
             -- ALTER TABLE bookings ALTER COLUMN datefrom SET DEFAULT now();
             -- lägg till främmande nyckel senare:
             -- ALTER TABLE bookings ADD CONSTRAINT guest_id_key FOREIGN KEY (guest_id) REFERENCES guests(id);

@@ -19,13 +19,22 @@ app.add_middleware(
 # Create tables at startup
 create_schema()
 
-# Pydantic model
+# -----------------------------
+# Pydantic models
+# -----------------------------
 class Booking(BaseModel):
     guest_id: int
     room_id: int
     datefrom: date
     dateto: date
 
+class BookingStars(BaseModel):
+    stars: int
+
+
+# -----------------------------
+# Root
+# -----------------------------
 @app.get("/")
 def read_root():
     with get_conn() as conn, conn.cursor() as cur:
@@ -33,7 +42,10 @@ def read_root():
         result = cur.fetchone()
     return {"msg": "Hotel API!", "db_status": result}
 
-# List all rooms
+
+# -----------------------------
+# Rooms
+# -----------------------------
 @app.get("/rooms")
 def get_rooms():
     with get_conn() as conn, conn.cursor() as cur:
@@ -45,7 +57,7 @@ def get_rooms():
         rooms = cur.fetchall()
     return rooms
 
-# Get one room
+
 @app.get("/rooms/{id}")
 def get_room(id: int):
     with get_conn() as conn, conn.cursor() as cur:
@@ -57,7 +69,10 @@ def get_room(id: int):
         room = cur.fetchone()
     return room
 
+
+# -----------------------------
 # Create booking
+# -----------------------------
 @app.post("/bookings")
 def create_booking(booking: Booking):
     with get_conn() as conn, conn.cursor() as cur:
@@ -79,7 +94,10 @@ def create_booking(booking: Booking):
         new_booking = cur.fetchone()
     return {"msg": "Booking created!", "id": new_booking["id"]}
 
-#Endpoint 
+
+# -----------------------------
+# Get all bookings
+# -----------------------------
 @app.get("/bookings")
 def get_bookings():
     with get_conn() as conn, conn.cursor() as cur:
@@ -92,7 +110,8 @@ def get_bookings():
                 b.datefrom,
                 b.dateto,
                 (b.dateto - b.datefrom) AS nights,
-                ((b.dateto - b.datefrom) * r.price) AS total_price
+                ((b.dateto - b.datefrom) * r.price) AS total_price,
+                b.stars
             FROM bookings b
             INNER JOIN guests g ON b.guest_id = g.id
             INNER JOIN rooms r ON b.room_id = r.id
@@ -102,6 +121,26 @@ def get_bookings():
     return bookings
 
 
+# -----------------------------
+# Update stars for a booking
+# -----------------------------
+@app.put("/bookings/{id}")
+def update_booking(id: int, data: BookingStars):
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("""
+            UPDATE bookings
+            SET stars = %s
+            WHERE id = %s
+            RETURNING id, stars
+        """, (data.stars, id))
+        updated = cur.fetchone()
+
+    return {"msg": "Stars updated!", "booking": updated}
+
+
+# -----------------------------
+# Guests
+# -----------------------------
 @app.get("/guests")
 def get_guests():
     with get_conn() as conn, conn.cursor() as cur:
