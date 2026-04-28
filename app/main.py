@@ -161,3 +161,11 @@ def get_guests():
         guests = cur.fetchall()
     return guests
 
+@app.get("/report/monthly")
+def get_monthly_report():
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT * FROM monthly_report ORDER BY month DESC")
+        report = cur.fetchall()
+    return report
+
+
